@@ -1,4 +1,4 @@
-<svg id="icon-veda" class="icono-palabra hidden" viewBox="0 0 100 100">
+<svg id="icon-veda" width="120" height="120" viewBox="0 0 100 100">
   <line x1="20" y1="50" x2="80" y2="50" stroke="#C0392B" stroke-width="6"/>
   <circle cx="50" cy="50" r="20" fill="none" stroke="#E74C3C" stroke-width="4"/>
 </svg>
