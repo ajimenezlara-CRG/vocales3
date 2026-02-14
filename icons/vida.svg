@@ -1,4 +1,4 @@
-<svg id="icon-vida" class="icono-palabra hidden" viewBox="0 0 100 100">
+<svg id="icon-vida" width="120" height="120" viewBox="0 0 100 100">
   <path d="M20 50 Q50 10 80 50 Q50 90 20 50 Z"
         fill="#F1948A" stroke="#C0392B" stroke-width="3"/>
 </svg>
