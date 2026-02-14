@@ -1,4 +1,4 @@
-<svg id="icon-pira" class="icono-palabra hidden" viewBox="0 0 100 100">
+<svg id="icon-pira" width="120" height="120" viewBox="0 0 100 100">
   <polygon points="50,20 70,60 30,60" fill="#E59866" stroke="#A04000" stroke-width="3"/>
   <rect x="40" y="60" width="20" height="20" fill="#6E2C00"/>
 </svg>
