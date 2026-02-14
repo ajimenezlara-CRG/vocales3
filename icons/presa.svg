@@ -1,4 +1,4 @@
-<svg id="icon-presa" class="icono-palabra hidden" viewBox="0 0 100 100">
+<svg id="icon-presa" width="120" height="120" viewBox="0 0 100 100">
   <circle cx="40" cy="50" r="10" fill="#A04000"/>
   <circle cx="60" cy="50" r="10" fill="#A04000"/>
   <circle cx="50" cy="65" r="12" fill="#6E2C00"/>
