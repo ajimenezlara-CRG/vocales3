@@ -1,4 +1,4 @@
-<svg id="icon-arete" class="icono-palabra hidden" viewBox="0 0 100 100">
+<svg id="icon-arete" width="120" height="120" viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="20" fill="none" stroke="#5DADE2" stroke-width="4"/>
   <circle cx="50" cy="50" r="6" fill="#5DADE2"/>
 </svg>
