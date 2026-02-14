@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocales E e I</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Vocales E/I">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .icono-palabra {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-b from-blue-50 to-blue-100 min-h-screen flex items-center justify-center">
+
+  <!-- APP PRINCIPAL -->
+  <div id="app" class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md transition-all">
+
+    <h1 class="text-2xl font-bold mb-4 text-center text-indigo-600">
+      Práctica de vocales E e I
+    </h1>
+
+    <!-- Selector de dificultad -->
+    <div class="flex justify-center gap-3 mb-4">
+      <button onclick="setDifficulty(1)" id="dif1"
+        class="px-3 py-1 bg-green-200 hover:bg-green-300 rounded font-semibold">
+        Nivel 1
+      </button>
+
+      <button onclick="setDifficulty(2)" id="dif2"
+        class="px-3 py-1 bg-yellow-200 hover:bg-yellow-300 rounded font-semibold">
+        Nivel 2
+      </button>
+
+      <button onclick="setDifficulty(3)" id="dif3"
+        class="px-3 py-1 bg-red-200 hover:bg-red-300 rounded font-semibold">
+        Nivel 3
+      </button>
+    </div>
+
+    <!-- Selector de modo -->
+    <div class="flex justify-center gap-4 mb-4">
+      <button id="modoVocalesBtn"
+        onclick="setMode('vocales')"
+        class="px-4 py-2 bg-indigo-200 hover:bg-indigo-300 rounded-xl shadow font-semibold">
+        Completar vocales
+      </button>
+
+      <button id="modoDictadoBtn"
+        onclick="setMode('dictado')"
+        class="px-4 py-2 bg-yellow-200 hover:bg-yellow-300 rounded-xl shadow font-semibold">
+        Dictado
+      </button>
+    </div>
+
+    <!-- ICONO -->
+    <div class="flex justify-center mb-3">
+      <img id="imageIcon" class="icono-palabra hidden" />
+    </div>
+
+    <!-- DEFINICIÓN -->
+    <p id="definition" class="mb-4 text-gray-700 text-center font-bold"></p>
+
+    <!-- PALABRA CON HUECOS (NIVEL 1) -->
+    <div id="wordContainer"
+      class="flex justify-center gap-3 flex-nowrap text-xl font-semibold mb-4 whitespace-nowrap overflow-x-auto">
+    </div>
+
+    <!-- CAMPO DE TEXTO (NIVEL 2 y 3) -->
+    <div id="dictadoContainer" class="hidden mb-4">
+      <label class="block text-gray-600 mb-2 text-center">Escribe la palabra:</label>
+      <input id="dictadoInput" type="text"
+        class="w-full border border-gray-300 rounded px-3 py-2 text-center text-lg"
+        autocomplete="off">
+    </div>
+
+    <!-- TIEMPO -->
+    <div class="text-center mb-4 text-gray-600">
+      Tiempo: <span id="timer">0.0</span> s
+    </div>
+
+    <!-- BOTONES -->
+    <button onclick="checkAnswer()"
+      class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 w-full">
+      Comprobar
+    </button>
+
+    <button onclick="speakWord()"
+      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full mt-3">
+      Escuchar palabra
+    </button>
+
+    <p id="message" class="mt-4 text-center font-medium"></p>
+
+    <div class="mt-4 text-sm text-gray-600 text-center">
+      Aciertos: <span id="correct">0</span> |
+      Fallos: <span id="incorrect">0</span> |
+      Palabras: <span id="count">0</span>/10
+    </div>
+  </div>
+
+  <!-- RESUMEN FINAL -->
+  <div id="summary" class="hidden bg-white p-6 rounded-2xl shadow-xl w-full max-w-md text-center">
+    <h2 class="text-2xl font-bold text-indigo-600 mb-4">Resumen</h2>
+    <p id="summaryText" class="text-gray-700 mb-4"></p>
+    <button onclick="restart()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 w-full">
+      Volver a empezar
+    </button>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    let mode = "vocales";
+    let difficulty = 1;
+
+    let correct = 0;
+    let incorrect = 0;
+    let count = 0;
+    let currentWord = {};
+    let startTime = 0;
+    let timerInterval;
+    let wordSet = [];
+
+    const words = [
+      { word: "perejil", definition: "Planta aromática usada en cocina.", icon: "perejil" },
+      { word: "mesa", definition: "Mueble con superficie plana para comer o trabajar.", icon: "mesa" },
+      { word: "limón", definition: "Fruta amarilla de sabor ácido.", icon: "limon" },
+      { word: "película", definition: "Obra cinematográfica.", icon: "pelicula" },
+      { word: "bicicleta", definition: "Vehículo de dos ruedas movido por pedales.", icon: "bicicleta" },
+      { word: "pisar", definition: "Poner el pie sobre algo.", icon: "pisar" },
+      { word: "pesar", definition: "Determinar el peso de algo.", icon: "pesar" },
+      { word: "lima", definition: "Fruta o herramienta para limar.", icon: "lima" },
+      { word: "lema", definition: "Frase que expresa una idea o propósito.", icon: "lema" },
+      { word: "pipa", definition: "Semilla de girasol o instrumento para fumar.", icon: "pipa" },
+      { word: "Pepa", definition: "Nombre propio femenino.", icon: "pepa" },
+      { word: "recurrir", definition: "Acudir a alguien o algo para obtener ayuda.", icon: "recurrir" },
+      { word: "recorrer", definition: "Ir de un lugar a otro atravesándolo.", icon: "recorrer" },
+
+      { word: "pera", definition: "Fruta dulce de piel verde o amarilla.", icon: "pera" },
+      { word: "pira", definition: "Montón de leña para quemar algo.", icon: "pira" },
+      { word: "pinar", definition: "Terreno poblado de pinos.", icon: "pinar" },
+      { word: "penar", definition: "Sentir pena o sufrimiento.", icon: "penar" },
+      { word: "lío", definition: "Situación confusa o complicada.", icon: "lio" },
+      { word: "leo", definition: "Primera persona del verbo leer.", icon: "leo" },
+      { word: "rima", definition: "Coincidencia de sonidos al final de versos.", icon: "rima" },
+      { word: "rema", definition: "Forma del verbo remar.", icon: "rema" },
+      { word: "queso", definition: "Alimento hecho a partir de leche cuajada.", icon: "queso" },
+      { word: "quiso", definition: "Pasado del verbo querer.", icon: "quiso" },
+      { word: "beber", definition: "Ingerir líquidos.", icon: "beber" },
+      { word: "vivir", definition: "Existir o tener vida.", icon: "vivir" },
+      { word: "vida", definition: "Estado de los seres vivos.", icon: "vida" },
+      { word: "veda", definition: "Prohibición temporal de cazar o pescar.", icon: "veda" },
+      { word: "arete", definition: "Adorno que se lleva en la oreja.", icon: "arete" },
+      { word: "ariete", definition: "Máquina antigua para derribar puertas o muros.", icon: "ariete" },
+      { word: "repetir", definition: "Volver a decir o hacer algo.", icon: "repetir" },
+      { word: "presa", definition: "Animal cazado o capturado.", icon: "presa" },
+      { word: "prisa", definition: "Necesidad de hacer algo rápidamente.", icon: "prisa" },
+      { word: "tijeras", definition: "Herramienta para cortar.", icon: "tijeras" },
+      { word: "tejido", definition: "Material formado por fibras entrelazadas.", icon: "tejido" },
+      { word: "tela", definition: "Material textil.", icon: "tela" },
+      { word: "tila", definition: "Infusión hecha con flores de tilo.", icon: "tila" },
+      { word: "bebida", definition: "Líquido que se puede beber.", icon: "bebida" },
+      { word: "sello", definition: "Marca o estampilla usada para certificar algo.", icon: "sello" },
+      { word: "silla", definition: "Asiento con respaldo.", icon: "silla" },
+      { word: "hiena", definition: "Mamífero carnívoro de risa característica.", icon: "hiena" },
+      { word: "hielo", definition: "Agua congelada.", icon: "hielo" },
+      { word: "caer", definition: "Perder el equilibrio y descender.", icon: "caer" },
+      { word: "caída", definition: "Acción de caer.", icon: "caida" }
+    ];
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.getElementById("modoVocalesBtn").classList.toggle("ring-4", mode === "vocales");
+      document.getElementById("modoDictadoBtn").classList.toggle("ring-4", mode === "dictado");
+      restart();
+    }
+
+    function setDifficulty(n) {
+      difficulty = n;
+      document.getElementById("dif1").classList.toggle("ring-4", n === 1);
+      document.getElementById("dif2").classList.toggle("ring-4", n === 2);
+      document.getElementById("dif3").classList.toggle("ring-4", n === 3);
+      restart();
+    }
+
+    function generateWordSet() {
+      const shuffled = [...words].sort(() => Math.random() - 0.5);
+      wordSet = shuffled.slice(0, 10);
+    }
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        document.getElementById("timer").textContent = elapsed;
+      }, 100);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function speakWord() {
+      const utterance = new SpeechSynthesisUtterance(currentWord.word);
+      utterance.lang = "es-ES";
+      utterance.rate = 0.9;
+      speechSynthesis.speak(utterance);
+    }
+
+    function newWord() {
+      if (count >= 10) return showSummary();
+
+      currentWord = wordSet[count];
+      document.getElementById("message").textContent = "";
+
+      const iconImg = document.getElementById("imageIcon");
+      iconImg.classList.add("hidden");
+
+      if (difficulty !== 3) {
+        iconImg.src = `icons/${currentWord.icon}.svg`;
+        iconImg.classList.remove("hidden");
+      }
+
+      if (difficulty !== 3) {
+        document.getElementById("definition").textContent = currentWord.definition;
+        document.getElementById("definition").classList.remove("hidden");
+      } else {
+        document.getElementById("definition").classList.add("hidden");
+      }
+
+      document.getElementById("wordContainer").classList.add("hidden");
+      document.getElementById("dictadoContainer").classList.add("hidden");
+
+      if (difficulty === 1) {
+        const wc = document.getElementById("wordContainer");
+        wc.innerHTML = "";
+        wc.classList.remove("hidden");
+
+        [...currentWord.word].forEach((char, index) => {
+          if (/[eiEI]/.test(char)) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "flex flex-col items-center";
+
+            const display = document.createElement("div");
+            display.className = "w-6 h-8 border-b-2 border-gray-400 text-center";
+            display.dataset.index = index;
+            wrapper.appendChild(display);
+
+            const buttons = document.createElement("div");
+            buttons.className = "flex gap-1 mt-1";
+
+            const btnE = document.createElement("button");
+            btnE.textContent = "e";
+            btnE.className = "px-2 py-1 bg-blue-300 rounded hover:bg-blue-400 text-sm";
+            btnE.onclick = () => (display.textContent = "e");
+
+            const btnI = document.createElement("button");
+            btnI.textContent = "i";
+            btnI.className = "px-2 py-1 bg-red-300 rounded hover:bg-red-400 text-sm";
+            btnI.onclick = () => (display.textContent = "i");
+
+            buttons.appendChild(btnE);
+            buttons.appendChild(btnI);
+            wrapper.appendChild(buttons);
+            wc.appendChild(wrapper);
+
+          } else {
+            const span = document.createElement("span");
+            span.textContent = char;
+            wc.appendChild(span);
+          }
+        });
+      }
+
+      if (difficulty === 2 || difficulty === 3) {
+        document.getElementById("dictadoContainer").classList.remove("hidden");
+        document.getElementById("dictadoInput").value = "";
+        document.getElementById("dictadoInput").focus();
+      }
+
+      speakWord();
+      startTimer();
+    }
+
+    function checkAnswer() {
+      stopTimer();
+      count++;
+
+      let finalWord = "";
+
+      if (difficulty === 1) {
+        let reconstructed = [...currentWord.word];
+        const displays = document.querySelectorAll("#wordContainer div[data-index]");
+        displays.forEach(display => {
+          const index = display.dataset.index;
+          reconstructed[index] = display.textContent.toLowerCase();
+        });
+        finalWord = reconstructed.join("");
+      }
+
+      if (difficulty === 2 || difficulty === 3) {
+        finalWord = document.getElementById("dictadoInput").value.trim().toLowerCase();
+      }
+
+      if (finalWord === currentWord.word.toLowerCase()) {
+        correct++;
+        animateMessage("¡Correcto!", "text-green-600");
+      } else {
+        incorrect++;
+        animateMessage(`Incorrecto. Era "${currentWord.word}".`, "text-red-600");
+      }
+
+      document.getElementById("correct").textContent = correct;
+      document.getElementById("incorrect").textContent = incorrect;
+      document.getElementById("count").textContent = count;
+
+      setTimeout(newWord, 1500);
+    }
+
+    function animateMessage(text, colorClass) {
+      const msg = document.getElementById("message");
+      msg.textContent = text;
+      msg.className = `mt-4 text-center font-medium ${colorClass} transition transform scale-125`;
+      setTimeout(() => msg.classList.remove("scale-125"), 200);
+    }
+
+    function showSummary() {
+      document.getElementById("app").classList.add("hidden");
+      document.getElementById("summary").classList.remove("hidden");
+
+      document.getElementById("summaryText").innerHTML = `
+        <p class="text-lg mb-2">Has completado 10 palabras distintas.</p>
+        <p class="text-green-600 font-bold">Aciertos: ${correct}</p>
+        <p class="text-red-600 font-bold">Fallos: ${incorrect}</p>
+      `;
+    }
+
+    function restart() {
+      correct = 0;
+      incorrect = 0;
+      count = 0;
+
+      document.getElementById("correct").textContent = 0;
+      document.getElementById("incorrect").textContent = 0;
+      document.getElementById("count").textContent = 0;
+
+      document.getElementById("summary").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+
+      generateWordSet();
+      newWord();
+    }
+
+    window.onload = () => {
+      generateWordSet();
+      newWord();
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+      }
+    };
+  </script>
+</body>
+</html>

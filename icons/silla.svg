@@ -1,0 +1,6 @@
+<svg id="icon-silla" class="icono-palabra hidden" viewBox="0 0 100 100">
+  <rect x="30" y="25" width="40" height="20" fill="#D7DBDD" stroke="#7B7D7D" stroke-width="3"/>
+  <rect x="30" y="45" width="40" height="25" fill="#AEB6BF"/>
+  <line x1="30" y1="70" x2="30" y2="85" stroke="#7B7D7D" stroke-width="4"/>
+  <line x1="70" y1="70" x2="70" y2="85" stroke="#7B7D7D" stroke-width="4"/>
+</svg>
